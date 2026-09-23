@@ -41,6 +41,7 @@
     <button class="tab active" data-tab="instrument" role="tab" aria-selected="true">Instrument</button>
     <button class="tab" data-tab="registry" role="tab" aria-selected="false">Registry <span id="regCount" class="count">0</span></button>
     <button class="tab" data-tab="about" role="tab" aria-selected="false">About</button>
+    <button id="consoleClose" class="tab tab-close" type="button" aria-label="Close console">✕</button>
   </nav>
 
   <section id="tab-instrument" class="tabpage active" role="tabpanel">
@@ -130,19 +131,23 @@
 <button id="consoleToggle" aria-label="Toggle console" aria-expanded="true">☰</button>
 
 <div id="chronometer" aria-label="Time controls">
-  <button id="btnPlay" type="button" aria-label="Pause">⏸</button>
-  <div class="speeds" role="group" aria-label="Time speed">
-    <button data-speed="1" class="active" type="button">1×</button>
-    <button data-speed="60" type="button">60×</button>
-    <button data-speed="600" type="button">600×</button>
-    <button data-speed="3600" type="button">3600×</button>
+  <div class="crow crow-date">
+    <input id="datePick" type="date" class="mono" aria-label="Choose a date" min="1800-01-01" max="2050-12-31" title="Jump to any date, 1800–2050 — revisit the sky of a birthday, an anniversary, a first light">
+    <div id="chronoTime" class="mono">—</div>
+    <button id="btnNow" type="button">Now</button>
   </div>
-  <button id="btnDayMinus" type="button" aria-label="Previous day">−1d</button>
-  <div id="chronoDate" class="mono">—</div>
-  <button id="btnDayPlus" type="button" aria-label="Next day">+1d</button>
-  <input id="timeSlider" type="range" min="0" max="1439" value="0" aria-label="Time of day">
-  <div id="chronoTime" class="mono">—</div>
-  <button id="btnNow" type="button">Now</button>
+  <div class="crow crow-transport">
+    <button id="btnPlay" type="button" aria-label="Pause">⏸</button>
+    <div class="speeds" role="group" aria-label="Time speed">
+      <button data-speed="1" class="active" type="button">1×</button>
+      <button data-speed="60" type="button">60×</button>
+      <button data-speed="600" type="button">600×</button>
+      <button data-speed="3600" type="button">3600×</button>
+    </div>
+    <button id="btnDayMinus" type="button" aria-label="Previous day">−1d</button>
+    <button id="btnDayPlus" type="button" aria-label="Next day">+1d</button>
+    <input id="timeSlider" type="range" min="0" max="1439" value="0" aria-label="Time of day">
+  </div>
 </div>
 
 <div id="layers" aria-label="Chart layers">

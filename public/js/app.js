@@ -755,7 +755,8 @@ function renderVerdict(t) {
     rows += '<tr><td>Side ' + sNames[i] + '</td><td>' + t.sides[i].toFixed(3) + '°</td><td>∠' + ROMAN[i] + '</td><td>' + t.angles[i].toFixed(2) + '°</td></tr>';
   $('verdict').hidden = false;
   $('verdict').innerHTML =
-    '<div class="tri-id">' + esc(t.id) + ' · filed ' + fmtDate(new Date(t.filedAt)) + ' ' + fmtClock(new Date(t.filedAt)) + ' UTC</div>' +
+    '<div class="tri-id">' + esc(t.id) + '</div>' +
+    '<div class="tri-filed">filed ' + fmtDate(new Date(t.filedAt)) + ' ' + fmtClock(new Date(t.filedAt)) + ' UTC</div>' +
     '<h3>' + esc(t.name) + '</h3><div class="latin-sub">' + esc(t.sub) + ' · ' + esc(t.site) + '</div>' +
     '<div class="stamp">△ Triangle</div>' +
     '<table class="verdict-table"><tr><th>Element</th><th>Measure</th><th>Angle</th><th>Measure</th></tr>' + rows +
@@ -893,16 +894,23 @@ function updateReadouts(date) {
   $('roUTC').textContent = fmtClock(date);
   $('roLST').textContent = fmtHMS(lastLst * R2D / 15);
   var sunD = (lastSunAlt * R2D);
-  var twName = Astro.twilight(lastSunAlt * R2D).toLowerCase();
-  $('roSun').textContent = (sunD >= 0 ? '+' : '') + sunD.toFixed(1) + '° ' + twName;
+  var twFull = Astro.twilight(lastSunAlt * R2D).toLowerCase();
+  var sunTxt = (sunD >= 0 ? '+' : '') + sunD.toFixed(1) + '° ' + twFull;
+  $('roSun').textContent = sunTxt;
+  $('roSun').title = sunTxt;
   var mo = Astro.moonPos(date);
   var mcn = constellationAt(mo.ra, mo.dec);
-  $('roMoon').textContent = Math.round(mo.illum * 100) + '% · ' + (CON_NAMES[mcn] || mcn);
+  var moonTxt = Math.round(mo.illum * 100) + '% · ' + (CON_NAMES[mcn] || mcn);
+  $('roMoon').textContent = moonTxt;
+  $('roMoon').title = moonTxt;
   var se = Astro.seasonOf(lastSun.lon * R2D);
   if (site.lat < 0) se = { Spring: 'Autumn', Summer: 'Winter', Autumn: 'Spring', Winter: 'Summer' }[se];
   $('roSeason').textContent = se;
   // chronometer
-  $('chronoDate').textContent = fmtDate(date);
+  var dp = $('datePick');
+  var p2 = function (n) { return (n < 10 ? '0' : '') + n; };
+  var iso = date.getUTCFullYear() + '-' + p2(date.getUTCMonth() + 1) + '-' + p2(date.getUTCDate());
+  if (dp.value !== iso) dp.value = iso;
   $('chronoTime').textContent = fmtClock(date) + ' UTC';
   if (playing && !scrubbing) $('timeSlider').value = date.getUTCHours() * 60 + date.getUTCMinutes();
   // day notice
@@ -941,6 +949,16 @@ for (var sb = 0; sb < speedBtns.length; sb++) {
 $('btnDayMinus').addEventListener('click', function () { simMs -= 86400000; });
 $('btnDayPlus').addEventListener('click', function () { simMs += 86400000; });
 $('btnNow').addEventListener('click', function () { simMs = Date.now(); });
+$('datePick').addEventListener('change', function () {
+  var v = this.value;
+  if (!v) return;
+  var m = v.split('-');
+  if (m.length !== 3) return;
+  var d = new Date(simMs);
+  // keep the current time of day; move the calendar date
+  simMs = Date.UTC(parseInt(m[0], 10), parseInt(m[1], 10) - 1, parseInt(m[2], 10),
+    d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds());
+});
 var slider = $('timeSlider');
 slider.addEventListener('pointerdown', function () { scrubbing = true; });
 window.addEventListener('pointerup', function () { scrubbing = false; });
@@ -963,7 +981,7 @@ for (var lb = 0; lb < layerBtns.length; lb++) {
     });
   })(layerBtns[lb]);
 }
-var tabBtns = document.querySelectorAll('.tab');
+var tabBtns = document.querySelectorAll('.tab[data-tab]');
 for (var tb = 0; tb < tabBtns.length; tb++) {
   (function (b) {
     b.addEventListener('click', function () {
@@ -982,6 +1000,11 @@ for (var tb = 0; tb < tabBtns.length; tb++) {
 $('consoleToggle').addEventListener('click', function () {
   var c = $('console'), open = c.classList.toggle('open');
   this.setAttribute('aria-expanded', open);
+});
+var consoleClose = $('consoleClose');
+if (consoleClose) consoleClose.addEventListener('click', function () {
+  $('console').classList.remove('open');
+  $('consoleToggle').setAttribute('aria-expanded', 'false');
 });
 $('siteGo').addEventListener('click', function () {
   var la = parseFloat($('siteLat').value), lo = parseFloat($('siteLon').value);
