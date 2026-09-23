@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Triangulum — Stellar Triangulation Observatory</title>
+<meta name="description" content="A professional instrument for the rigorous classification of three-star figures. Three stars. Always a triangle.">
+<meta name="theme-color" content="#04060c">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 5 28 26 4 26Z' fill='none' stroke='%23d9a441' stroke-width='2'/%3E%3Ccircle cx='16' cy='5' r='2.4' fill='%23f2c063'/%3E%3Ccircle cx='28' cy='26' r='2.4' fill='%23f2c063'/%3E%3Ccircle cx='4' cy='26' r='2.4' fill='%23f2c063'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<canvas id="sky" aria-label="Live star chart. Click any three stars to triangulate."></canvas>
+<div class="frame" aria-hidden="true"></div>
+
+<header id="topbar">
+  <div class="brand">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M16 5 28 26 4 26Z" fill="none" stroke="currentColor" stroke-width="1.6"/>
+      <circle cx="16" cy="5" r="2.2" fill="currentColor"/>
+      <circle cx="28" cy="26" r="2.2" fill="currentColor"/>
+      <circle cx="4" cy="26" r="2.2" fill="currentColor"/>
+    </svg>
+    <div class="brand-text">
+      <h1>Triangulum</h1>
+      <p>Stellar Triangulation Observatory</p>
+    </div>
+  </div>
+  <div id="readouts" aria-live="off">
+    <div class="ro"><span class="k">Local</span><span class="v" id="roLocal">—</span></div>
+    <div class="ro"><span class="k">UTC</span><span class="v" id="roUTC">—</span></div>
+    <div class="ro"><span class="k">Sidereal</span><span class="v" id="roLST">—</span></div>
+    <div class="ro"><span class="k">Sun</span><span class="v" id="roSun">—</span></div>
+    <div class="ro"><span class="k">Moon</span><span class="v" id="roMoon">—</span></div>
+    <div class="ro"><span class="k">Season</span><span class="v" id="roSeason">—</span></div>
+  </div>
+</header>
+
+<aside id="console" aria-label="Survey console">
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-tab="instrument" role="tab" aria-selected="true">Instrument</button>
+    <button class="tab" data-tab="registry" role="tab" aria-selected="false">Registry <span id="regCount" class="count">0</span></button>
+    <button class="tab" data-tab="about" role="tab" aria-selected="false">About</button>
+  </nav>
+
+  <section id="tab-instrument" class="tabpage active" role="tabpanel">
+    <div class="plaque" id="standingResult">
+      <div class="plaque-k">Standing result</div>
+      <div class="plaque-v" id="standingText">The Survey awaits its first figure.</div>
+    </div>
+
+    <div class="field">
+      <label for="starSearch">Find a star</label>
+      <div class="searchrow">
+        <input id="starSearch" type="search" placeholder="e.g. Vega, Antares, Polaris…" autocomplete="off" spellcheck="false">
+        <button id="searchGo" type="button">Locate</button>
+      </div>
+      <div id="searchResult" class="searchresult" hidden></div>
+    </div>
+
+    <div class="field">
+      <div class="fieldhead"><label>Triangulation vertices</label><span class="hintline">click any three stars</span></div>
+      <ol id="vertices">
+        <li data-v="0"><span class="vn">I</span><span class="vs">— awaiting selection —</span></li>
+        <li data-v="1"><span class="vn">II</span><span class="vs">— awaiting selection —</span></li>
+        <li data-v="2"><span class="vn">III</span><span class="vs">— awaiting selection —</span></li>
+      </ol>
+      <div class="btnrow">
+        <button id="btnClearV" type="button" class="ghost">Clear</button>
+      </div>
+    </div>
+
+    <div id="analysis" class="field" hidden>
+      <div class="fieldhead"><label>Figure analysis</label></div>
+      <div id="analysisStatus" class="statusline"></div>
+      <div id="verdict" hidden></div>
+    </div>
+
+    <div id="dayNotice" class="notice" hidden>
+      <strong>Solar interference.</strong>
+      <span id="dayNoticeText">Triangulation is suspended until dusk — the stars are present but uncooperative.</span>
+      <button id="btnNight" type="button" class="ghost">Scrub to nightfall</button>
+    </div>
+  </section>
+
+  <section id="tab-registry" class="tabpage" role="tabpanel">
+    <div class="plaque">
+      <div class="plaque-k">Survey totals</div>
+      <div class="plaque-v" id="registryStats">0 figures examined · 0 triangles · 0 non-triangles</div>
+    </div>
+    <ol id="registryList" class="registry"></ol>
+    <p id="registryEmpty" class="dim">No figures filed yet. The sky is full of candidates.</p>
+  </section>
+
+  <section id="tab-about" class="tabpage" role="tabpanel">
+    <h2>The Survey</h2>
+    <p>For millennia, astronomers joined pairs of stars and called the result a line.
+       The Stellar Triangulation Survey asks the next question: <em>when any three
+       stars are joined, what figure is formed?</em></p>
+    <p><strong>Method.</strong> Select any three stars in the dome above. The instrument
+       draws the figure, measures its sides in degrees of arc, sums its interior angles,
+       and classifies it with full rigor.</p>
+    <p><strong>Findings.</strong> Every figure examined to date has been a triangle.
+       The Survey continues, nightly.</p>
+    <h2>Provenance</h2>
+    <ul class="prov">
+      <li>Star positions &amp; magnitudes — <a href="https://codeberg.org/astronexus/hyg" target="_blank" rel="noopener">HYG Stellar Database v4.4</a> (Hipparcos · Yale Bright Star · Gliese), via Astronexus</li>
+      <li>Constellation figures &amp; boundaries, Milky Way outline — <a href="https://github.com/ofrohn/d3-celestial" target="_blank" rel="noopener">d3-celestial</a> © Olaf Frohn</li>
+      <li>Planetary theory — low-precision Keplerian elements (Schlyter); lunar theory with principal perturbations</li>
+      <li>Sky model — true local sidereal time, altitude–azimuth projection, twilight limiting-magnitude model</li>
+    </ul>
+    <p class="dim small">On the impossibility of the non-triangle: three non-collinear points
+       determine exactly one triangle (Euclid, <em>Elements</em> I). The instrument verifies this nightly.</p>
+    <div class="field">
+      <div class="fieldhead"><label>Observing site</label></div>
+      <div class="siterow">
+        <input id="siteName" type="text" value="Provo, Utah" aria-label="Site name">
+        <input id="siteLat" type="number" step="0.0001" value="40.2338" aria-label="Latitude">
+        <input id="siteLon" type="number" step="0.0001" value="-111.6585" aria-label="Longitude">
+        <button id="siteGo" type="button">Set</button>
+      </div>
+      <p class="dim small">Latitude °N, longitude °E. The dome, the clock and the seasons follow the site.</p>
+    </div>
+    <div class="btnrow">
+      <button id="btnExport" type="button" class="ghost">Export chart (PNG)</button>
+      <button id="btnBriefing" type="button" class="ghost">Replay briefing</button>
+    </div>
+  </section>
+</aside>
+<button id="consoleToggle" aria-label="Toggle console" aria-expanded="true">☰</button>
+
+<div id="chronometer" aria-label="Time controls">
+  <button id="btnPlay" type="button" aria-label="Pause">⏸</button>
+  <div class="speeds" role="group" aria-label="Time speed">
+    <button data-speed="1" class="active" type="button">1×</button>
+    <button data-speed="60" type="button">60×</button>
+    <button data-speed="600" type="button">600×</button>
+    <button data-speed="3600" type="button">3600×</button>
+  </div>
+  <button id="btnDayMinus" type="button" aria-label="Previous day">−1d</button>
+  <div id="chronoDate" class="mono">—</div>
+  <button id="btnDayPlus" type="button" aria-label="Next day">+1d</button>
+  <input id="timeSlider" type="range" min="0" max="1439" value="0" aria-label="Time of day">
+  <div id="chronoTime" class="mono">—</div>
+  <button id="btnNow" type="button">Now</button>
+</div>
+
+<div id="layers" aria-label="Chart layers">
+  <button data-layer="grid" class="active" type="button" aria-pressed="true">Grid</button>
+  <button data-layer="equatorial" type="button" aria-pressed="false">Equatorial</button>
+  <button data-layer="ecliptic" type="button" aria-pressed="false">Ecliptic</button>
+  <button data-layer="constellations" class="active" type="button" aria-pressed="true">Figures</button>
+  <button data-layer="milkyway" class="active" type="button" aria-pressed="true">Milky Way</button>
+  <button data-layer="labels" class="active" type="button" aria-pressed="true">Labels</button>
+</div>
+
+<div id="tooltip" hidden></div>
+
+<div id="briefing" hidden>
+  <div class="brief-card" role="dialog" aria-modal="true" aria-labelledby="briefTitle">
+    <div class="brief-k">Instrument briefing</div>
+    <h2 id="briefTitle">The Stellar Triangulation Survey</h2>
+    <p>For millennia, astronomers joined pairs of stars and called the result a line.
+       This instrument asks the next question:</p>
+    <p class="brief-q">When any three stars are joined,<br>what figure is formed?</p>
+    <p><strong>Method.</strong> The dome above shows the true sky over your site, at this
+       very hour. Select any three stars. The instrument draws the figure, measures it,
+       and classifies it with full rigor.</p>
+    <p><strong>Standing result.</strong> Every figure examined to date has been a triangle.
+       The Survey continues.</p>
+    <button id="btnBegin" type="button">Begin the survey</button>
+  </div>
+</div>
+
+<script src="js/data-stars.js"></script>
+<script src="js/data-con.js"></script>
+<script src="js/data-mw.js"></script>
+<script src="js/data-conbounds.js"></script>
+<script src="js/astro.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
