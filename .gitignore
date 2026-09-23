@@ -1,3 +1,4 @@
 data/hyg_v44.csv.gz
 node_modules/
 tests/shots/
+.wrangler/
