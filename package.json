@@ -1,0 +1,15 @@
+{
+  "name": "triangulum-stars",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Triangulum \u2014 Stellar Triangulation Observatory",
+  "type": "module",
+  "scripts": {
+    "test:e2e": "bash scripts/e2e-chrome.sh && E2E_TELEMETRY_DISABLED=1 e2e run"
+  },
+  "devDependencies": {
+    "@e2e-dev/web": "latest",
+    "e2e": "latest",
+    "playwright": "^1.55.0"
+  }
+}
